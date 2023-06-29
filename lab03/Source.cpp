@@ -6,8 +6,8 @@
 
 using namespace std;
 
-const size_t SCREEN_WIDTH = 80;
-const size_t MAX_ASTERISK = SCREEN_WIDTH - 3 - 1;
+const size_t SCREEN_WIDTH = 40;
+const size_t MAX_ASTERISK = SCREEN_WIDTH - 5;
 
 
 vector<double> input_numbers(size_t count) {
@@ -95,14 +95,29 @@ void show_histogram_svg(const vector<size_t>& bins) {
 	const auto TEXT_BASELINE = 20;
 	const auto TEXT_WIDTH = 50;
 	const auto BIN_HEIGHT = 30;
-	const auto BLOCK_WIDTH = 30;
+	const auto BLOCK_WIDTH = 10;
+
+	size_t max_count = 0;
+	bool flag_overflow = false;
+
+	for (size_t i = 0; i < bins.size(); i++) {
+		if (bins[i] > MAX_ASTERISK && bins[i] > max_count) {
+			max_count = bins[i];
+			flag_overflow = true;
+		}
+	}
 
 	svg_begin(IMAGE_WIDTH, IMAGE_HEIGHT);
 
 
 	double top = 0;
+	size_t number_of_stars;
 	for (size_t bin : bins) {
-		const double bin_width = BLOCK_WIDTH * bin;
+		number_of_stars = bin;
+		if (flag_overflow) {
+			number_of_stars = (int)MAX_ASTERISK * (static_cast<double>(bin) / max_count);
+		}
+		const double bin_width = BLOCK_WIDTH * number_of_stars;
 		svg_text(TEXT_LEFT, top + TEXT_BASELINE, to_string(bin));
 		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "blue", "#aaffaa");
 		top += BIN_HEIGHT;
