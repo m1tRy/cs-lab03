@@ -44,6 +44,15 @@ vector<size_t> make_histogram(const vector<double>& numbers, size_t bin_count) {
 	return bins;
 }
 
+
+void caption_for_histogram(double width, double top, string text) {
+	const auto ONE_SIMBOL = 7.5;
+	double word_lengs = text.length() * ONE_SIMBOL;
+	double x_poin = (width - word_lengs) / 2;
+	svg_text(x_poin, top, text);
+}
+
+
 void show_histogram_svg(const vector<size_t>& bins, string& histogram_color) {
 	const auto IMAGE_WIDTH = 400;
 	const auto IMAGE_HEIGHT = 300;
@@ -65,8 +74,10 @@ void show_histogram_svg(const vector<size_t>& bins, string& histogram_color) {
 
 	svg_begin(IMAGE_WIDTH, IMAGE_HEIGHT);
 
-
 	double top = 0;
+	caption_for_histogram(IMAGE_WIDTH, top + TEXT_BASELINE, "Histogram");
+	top = TEXT_BASELINE * 2;
+
 	size_t number_of_stars;
 	for (size_t bin : bins) {
 		number_of_stars = bin;
