@@ -44,38 +44,6 @@ vector<size_t> make_histogram(const vector<double>& numbers, size_t bin_count) {
 	return bins;
 }
 
-void svg_begin(double width, double height) {
-	cout << "<?xml version='1.0' encoding='UTF-8'?>\n";
-	cout << "<svg ";
-	cout << "width='" << width << "' ";
-	cout << "height='" << height << "' ";
-	cout << "viewBox='0 0 " << width << " " << height << "' ";
-	cout << "xmlns='http://www.w3.org/2000/svg'>\n";
-}
-
-void svg_text(double left, double baseline, string text) {
-	cout << "<text ";
-	cout << "x = '" << left << "' ";
-	cout << "y = '" << baseline << "'>";
-	cout << text << "</text>";
-}
-
-void svg_rect(double x, double y, double width, double height, string stroke = "black", string fill = "black") {
-
-	cout << "<rect ";
-	cout << "x = '" << x << "' ";
-	cout << "y = '" << y << "' ";
-	cout << "width = '" << width << "' ";
-	cout << "height = '" << height << "' ";
-	cout << "stroke = '" << stroke << "' ";
-	cout << "fill = '" << fill << "'";
-	cout << "/> ";
-}
-
-void svg_end() {
-	cout << "</svg>\n";
-}
-
 void show_histogram_svg(const vector<size_t>& bins) {
 	const auto IMAGE_WIDTH = 400;
 	const auto IMAGE_HEIGHT = 300;
