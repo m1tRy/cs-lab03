@@ -44,7 +44,7 @@ vector<size_t> make_histogram(const vector<double>& numbers, size_t bin_count) {
 	return bins;
 }
 
-void show_histogram_svg(const vector<size_t>& bins) {
+void show_histogram_svg(const vector<size_t>& bins, string& histogram_color) {
 	const auto IMAGE_WIDTH = 400;
 	const auto IMAGE_HEIGHT = 300;
 	const auto TEXT_LEFT = 20;
@@ -75,7 +75,7 @@ void show_histogram_svg(const vector<size_t>& bins) {
 		}
 		const double bin_width = BLOCK_WIDTH * number_of_stars;
 		svg_text(TEXT_LEFT, top + TEXT_BASELINE, to_string(bin));
-		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "blue", "#aaffaa");
+		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "blue", histogram_color);
 		top += BIN_HEIGHT;
 	}
 	svg_end();
@@ -84,17 +84,19 @@ void show_histogram_svg(const vector<size_t>& bins) {
 
 int main() {
 	size_t number_count;
-	std::cerr << "Enter number count:";
-	std::cin >> number_count;
+	cerr << "Enter number count:";
+	cin >> number_count;
 
-	std::cerr << "Enter numbers:";
+	cerr << "Enter numbers:";
 	const auto numbers = input_numbers(number_count);
 
 	size_t bin_count;
-	std::cerr << "Enter bin count:";
-	std::cin >> bin_count;
+	cerr << "Enter bin count:";
+	cin >> bin_count;
+
+	string histogram_color = input_hist_color();
 
 	const auto bins = make_histogram(numbers, bin_count);
 
-	show_histogram_svg(bins);
+	show_histogram_svg(bins, histogram_color);
 }

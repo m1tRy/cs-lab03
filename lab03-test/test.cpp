@@ -41,10 +41,23 @@ void test_empty() {
 	assert(max == 0);
 }
 
+void red_check_color() {
+	bool answer = check_color("red");
+	assert(answer == false);
+}
+
+void green_check_color() {
+	bool answer = check_color("green");
+	assert(answer == true);
+}
+
 int main() {
 	test_positive();
 	test_negative();
 	test_same_numbers();
 	test_one_elem();
 	test_empty();
+
+	red_check_color();
+	green_check_color();
 }

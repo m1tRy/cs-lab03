@@ -52,3 +52,26 @@ void svg_end() {
 	cout << "</svg>\n";
 }
 
+bool check_color(string color) {
+	bool ans;
+	if (color == "red") {
+		ans = false;
+	}
+	else {
+		ans = true;
+	}
+	return ans;
+}
+
+string input_hist_color() {
+	string color;
+	cerr << "Enter a color of histogram:";
+	cin >> color;
+
+	while (!check_color(color)) {
+		cerr << "Enter a color other than red:";
+		cin >> color;
+	}
+	return color;
+
+}

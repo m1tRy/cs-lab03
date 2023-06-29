@@ -15,3 +15,7 @@ void svg_rect(double x, double y, double width, double height, string stroke = "
 
 void svg_end();
 
+bool check_color(string color);
+
+string input_hist_color();
+
