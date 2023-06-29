@@ -8,7 +8,7 @@
 using namespace std;
 
 const size_t SCREEN_WIDTH = 40;
-const size_t MAX_ASTERISK = SCREEN_WIDTH - 5;
+const size_t MAX_ASTERISK = SCREEN_WIDTH - 5 - 2;
 
 
 vector<double> input_numbers(size_t count) {
@@ -19,13 +19,18 @@ vector<double> input_numbers(size_t count) {
 	return result;
 }
 
-vector<size_t> make_histogram(const vector<double>& numbers, size_t bin_count) {
+vector<size_t> make_histogram(const vector<double>& numbers, size_t bin_count, vector<double>& captions_for_bins) {
 	double min, max;
 	vector<size_t> bins(bin_count);
 
 	find_minmax(numbers, min, max);
 
 	double bin_size = (max - min) / bin_count;
+
+	for (size_t i = 0; i < bin_count - 1; i++)
+	{
+		captions_for_bins[i] = min + (i + 1) * bin_size;
+	}
 
 	for (size_t i = 0; i < numbers.size(); i++) {
 		bool found = false;
@@ -53,7 +58,7 @@ void caption_for_histogram(double width, double top, string text) {
 }
 
 
-void show_histogram_svg(const vector<size_t>& bins, string& histogram_color) {
+void show_histogram_svg(const vector<size_t>& bins, string& histogram_color, vector<double>& captions_for_bins) {
 	const auto IMAGE_WIDTH = 400;
 	const auto IMAGE_HEIGHT = 300;
 	const auto TEXT_LEFT = 20;
@@ -61,6 +66,7 @@ void show_histogram_svg(const vector<size_t>& bins, string& histogram_color) {
 	const auto TEXT_WIDTH = 50;
 	const auto BIN_HEIGHT = 30;
 	const auto BLOCK_WIDTH = 10;
+	const auto SHIFT_CAPT = 20;
 
 	size_t max_count = 0;
 	bool flag_overflow = false;
@@ -79,15 +85,22 @@ void show_histogram_svg(const vector<size_t>& bins, string& histogram_color) {
 	top = TEXT_BASELINE * 2;
 
 	size_t number_of_stars;
-	for (size_t bin : bins) {
-		number_of_stars = bin;
+	for (size_t i = 0; i < bins.size(); i++) {
+		number_of_stars = bins[i];
 		if (flag_overflow) {
-			number_of_stars = (int)MAX_ASTERISK * (static_cast<double>(bin) / max_count);
+			number_of_stars = (int)MAX_ASTERISK * (static_cast<double>(bins[i]) / max_count);
 		}
 		const double bin_width = BLOCK_WIDTH * number_of_stars;
-		svg_text(TEXT_LEFT, top + TEXT_BASELINE, to_string(bin));
-		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "blue", histogram_color);
+		svg_text(TEXT_LEFT + SHIFT_CAPT, top + TEXT_BASELINE, to_string(bins[i]));
+		svg_rect(TEXT_WIDTH + SHIFT_CAPT, top, bin_width, BIN_HEIGHT, "blue", histogram_color);
 		top += BIN_HEIGHT;
+
+		if (i < bins.size() - 1) {
+			double buf = captions_for_bins[i];
+			svg_text(TEXT_LEFT, top + TEXT_BASELINE, to_string(round(buf * 100) / 100));
+			top += BIN_HEIGHT;
+		}
+		
 	}
 	svg_end();
 }
@@ -107,7 +120,8 @@ int main() {
 
 	string histogram_color = input_hist_color();
 
-	const auto bins = make_histogram(numbers, bin_count);
+	vector<double> captions_for_bins(bin_count-1);
+	const auto bins = make_histogram(numbers, bin_count, captions_for_bins);
 
-	show_histogram_svg(bins, histogram_color);
+	show_histogram_svg(bins, histogram_color, captions_for_bins);
 }
