@@ -113,8 +113,13 @@ int main(int argc, char* argv[]) {
 			/*отключение проаерки SSL-сертификата (https://filesamples.com/samples/document/txt/sample3.txt)*/
 			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 			res = curl_easy_perform(curl);
-			cout << res;
 
+			if (res != CURLE_OK) {
+				cout << curl_easy_strerror(res);
+				exit(1);
+			}
+
+			cout << res;
 			curl_easy_cleanup(curl);
 		}
 
