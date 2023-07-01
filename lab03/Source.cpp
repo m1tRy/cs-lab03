@@ -1,4 +1,5 @@
 #include <iostream>
+#include <curl/curl.h>
 #include <vector>
 #include <cmath>
 #include <string>
@@ -94,7 +95,7 @@ void show_histogram_svg(const vector<size_t>& bins) {
 		}
 		const double bin_width = BLOCK_WIDTH * number_of_stars;
 		svg_text(TEXT_LEFT, top + TEXT_BASELINE, to_string(bin));
-		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "black", "#aaffaa");
+		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "green", "#aaffaa");
 		top += BIN_HEIGHT;
 	}
 	svg_end();
@@ -102,6 +103,8 @@ void show_histogram_svg(const vector<size_t>& bins) {
 
 
 int main() {
+	curl_global_init(CURL_GLOBAL_ALL);
+
 	const auto input = read_input(cin, true);
 
 	const auto bins = make_histogram(input);
