@@ -10,6 +10,10 @@ using namespace std;
 const size_t SCREEN_WIDTH = 40;
 const size_t MAX_ASTERISK = SCREEN_WIDTH - 5;
 
+struct Input {
+	vector<double> numbers;
+	size_t bin_count;
+};
 
 vector<double> input_numbers(istream& in, size_t count) {
 	vector<double> result(count);
@@ -17,6 +21,23 @@ vector<double> input_numbers(istream& in, size_t count) {
 		in >> result[i];
 	}
 	return result;
+}
+
+Input read_input(istream& in) {
+	Input data;
+
+	cerr << "Enter number count: ";
+	size_t number_count;
+	in >> number_count;
+
+	cerr << "Enter numbers: ";
+	data.numbers = input_numbers(in, number_count);
+
+	cerr << "Enter bin count:";
+	size_t bin_count;
+	cin >> data.bin_count;
+
+	return data;
 }
 
 vector<size_t> make_histogram(const vector<double>& numbers, size_t bin_count) {
@@ -75,7 +96,7 @@ void show_histogram_svg(const vector<size_t>& bins) {
 		}
 		const double bin_width = BLOCK_WIDTH * number_of_stars;
 		svg_text(TEXT_LEFT, top + TEXT_BASELINE, to_string(bin));
-		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "green", "#aaffaa");
+		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "blue", "#aaffaa");
 		top += BIN_HEIGHT;
 	}
 	svg_end();
@@ -83,18 +104,9 @@ void show_histogram_svg(const vector<size_t>& bins) {
 
 
 int main() {
-	size_t number_count;
-	cerr << "Enter number count:";
-	cin >> number_count;
+	const auto input = read_input(cin);
 
-	cerr << "Enter numbers:";
-	const auto numbers = input_numbers(cin, number_count);
-
-	size_t bin_count;
-	cerr << "Enter bin count:";
-	cin >> bin_count;
-
-	const auto bins = make_histogram(numbers, bin_count);
+	const auto bins = make_histogram(input.numbers, input.bin_count);
 
 	show_histogram_svg(bins);
 }
