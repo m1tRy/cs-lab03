@@ -10,11 +10,6 @@ using namespace std;
 const size_t SCREEN_WIDTH = 40;
 const size_t MAX_ASTERISK = SCREEN_WIDTH - 5;
 
-struct Input {
-	vector<double> numbers;
-	size_t bin_count;
-};
-
 vector<double> input_numbers(istream& in, size_t count) {
 	vector<double> result(count);
 	for (size_t i = 0; i < count; i++) {
@@ -40,26 +35,26 @@ Input read_input(istream& in) {
 	return data;
 }
 
-vector<size_t> make_histogram(const vector<double>& numbers, size_t bin_count) {
+vector<size_t> make_histogram(Input input) {
 	double min, max;
-	vector<size_t> bins(bin_count);
+	vector<size_t> bins(input.bin_count);
 
-	find_minmax(numbers, min, max);
+	find_minmax(input.numbers, min, max);
 
-	double bin_size = (max - min) / bin_count;
+	double bin_size = (max - min) / input.bin_count;
 
-	for (size_t i = 0; i < numbers.size(); i++) {
+	for (size_t i = 0; i < input.numbers.size(); i++) {
 		bool found = false;
-		for (size_t j = 0; (j < bin_count - 1) && !found; j++) {
+		for (size_t j = 0; (j < input.bin_count - 1) && !found; j++) {
 			auto lo = min + j * bin_size;
 			auto hi = min + (j + 1) * bin_size;
-			if ((lo <= numbers[i]) && (numbers[i] < hi)) {
+			if ((lo <= input.numbers[i]) && (input.numbers[i] < hi)) {
 				bins[j]++;
 				found = true;
 			}
 		}
 		if (!found) {
-			bins[bin_count - 1]++;
+			bins[input.bin_count - 1]++;
 		}
 	}
 	return bins;
@@ -96,7 +91,7 @@ void show_histogram_svg(const vector<size_t>& bins) {
 		}
 		const double bin_width = BLOCK_WIDTH * number_of_stars;
 		svg_text(TEXT_LEFT, top + TEXT_BASELINE, to_string(bin));
-		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "blue", "#aaffaa");
+		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "white", "#aaffaa");
 		top += BIN_HEIGHT;
 	}
 	svg_end();
@@ -106,7 +101,7 @@ void show_histogram_svg(const vector<size_t>& bins) {
 int main() {
 	const auto input = read_input(cin);
 
-	const auto bins = make_histogram(input.numbers, input.bin_count);
+	const auto bins = make_histogram(input);
 
 	show_histogram_svg(bins);
 }
