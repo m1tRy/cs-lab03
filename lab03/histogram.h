@@ -6,7 +6,9 @@
 
 struct Input {
 	std::vector<double> numbers;
+	std::vector<double> column_signature;
 	size_t bin_count;
+
 };
 
 void find_minmax(const std::vector<double>& numbers, double& min, double& max);

@@ -4,11 +4,12 @@
 #include <cmath>
 #include <string>
 #include <sstream>
+#include <iomanip>
 #include "histogram.h"
 
 
 const size_t SCREEN_WIDTH = 40;
-const size_t MAX_ASTERISK = SCREEN_WIDTH - 5;
+const size_t MAX_ASTERISK = SCREEN_WIDTH - 5 - 2;
 
 std::vector<double> input_numbers(std::istream& in, size_t count) {
 	std::vector<double> result(count);
@@ -42,13 +43,20 @@ Input read_input(std::istream& in, bool prompt) {
 	return data;
 }
 
-std::vector<size_t> make_histogram(Input input) {
+std::vector<size_t> make_histogram(Input &input) {
 	double min, max;
 	std::vector<size_t> bins(input.bin_count);
 
 	find_minmax(input.numbers, min, max);
 
 	double bin_size = (max - min) / input.bin_count;
+
+	std::vector<double> column_signature_local(input.bin_count - 1);
+	for (size_t i = 0; i < input.bin_count - 1; i++)
+	{
+		column_signature_local[i] = min + (i + 1) * bin_size;
+	}
+	input.column_signature = column_signature_local;
 
 	for (size_t i = 0; i < input.numbers.size(); i++) {
 		bool found = false;
@@ -67,7 +75,12 @@ std::vector<size_t> make_histogram(Input input) {
 	return bins;
 }
 
-void show_histogram_svg(const std::vector<size_t>& bins) {
+std::string make_nice_sign(double number) {
+	std::string string_num = std::to_string(round(number * 100) / 100);
+	return string_num.erase(string_num.find(".") + 3);
+}
+
+void show_histogram_svg(const std::vector<size_t>& bins, Input input) {
 	const auto IMAGE_WIDTH = 400;
 	const auto IMAGE_HEIGHT = 300;
 	const auto TEXT_LEFT = 20;
@@ -75,6 +88,7 @@ void show_histogram_svg(const std::vector<size_t>& bins) {
 	const auto TEXT_WIDTH = 50;
 	const auto BIN_HEIGHT = 30;
 	const auto BLOCK_WIDTH = 10;
+	const auto SHIFT_CAPT = 20;
 
 	size_t max_count = 0;
 	bool flag_overflow = false;
@@ -90,15 +104,21 @@ void show_histogram_svg(const std::vector<size_t>& bins) {
 
 	double top = 0;
 	size_t number_of_stars;
-	for (size_t bin : bins) {
-		number_of_stars = bin;
+	for (size_t i = 0; i < bins.size(); i++) {
+		number_of_stars = bins[i];
 		if (flag_overflow) {
-			number_of_stars = (int)MAX_ASTERISK * (static_cast<double>(bin) / max_count);
+			number_of_stars = (int)MAX_ASTERISK * (static_cast<double>(bins[i]) / max_count);
 		}
 		const double bin_width = BLOCK_WIDTH * number_of_stars;
-		svg_text(TEXT_LEFT, top + TEXT_BASELINE, std::to_string(bin));
-		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "red", "#aaffaa");
+		svg_text(TEXT_LEFT + SHIFT_CAPT, top + TEXT_BASELINE, std::to_string(bins[i]));
+		svg_rect(TEXT_WIDTH + SHIFT_CAPT, top, bin_width, BIN_HEIGHT, "blue", "#aaffaa");
 		top += BIN_HEIGHT;
+
+		if (i < bins.size() - 1) {
+			std::string string_signature = make_nice_sign(input.column_signature[i]);
+			svg_text(TEXT_LEFT, top + TEXT_BASELINE, string_signature);
+			top += BIN_HEIGHT;
+		}
 	}
 	svg_end();
 }
@@ -136,12 +156,13 @@ Input download(const std::string& address) {
 
 int main(int argc, char* argv[]) {
 	Input input;
-	if (argc > 1) {
+		if (argc > 1) {
 		input = download(argv[1]);
 	}
 	else {
 		input = read_input(std::cin, true);
 	}
+
 	const auto bins = make_histogram(input);
-	show_histogram_svg(bins);
+	show_histogram_svg(bins, input);
 }
