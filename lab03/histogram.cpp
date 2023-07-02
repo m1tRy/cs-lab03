@@ -1,6 +1,6 @@
 #include "histogram.h"
 
-void find_minmax(const vector<double>& numbers, double& min, double& max) {
+void find_minmax(const std::vector<double>& numbers, double& min, double& max) {
 	
 	if (numbers.size() != 0) {
 
@@ -20,35 +20,35 @@ void find_minmax(const vector<double>& numbers, double& min, double& max) {
 }
 
 void svg_begin(double width, double height) {
-	cout << "<?xml version='1.0' encoding='UTF-8'?>\n";
-	cout << "<svg ";
-	cout << "width='" << width << "' ";
-	cout << "height='" << height << "' ";
-	cout << "viewBox='0 0 " << width << " " << height << "' ";
-	cout << "xmlns='http://www.w3.org/2000/svg'>\n";
+	std::cout << "<?xml version='1.0' encoding='UTF-8'?>\n";
+	std::cout << "<svg ";
+	std::cout << "width='" << width << "' ";
+	std::cout << "height='" << height << "' ";
+	std::cout << "viewBox='0 0 " << width << " " << height << "' ";
+	std::cout << "xmlns='http://www.w3.org/2000/svg'>\n";
 }
 
-void svg_text(double left, double baseline, string text) {
-	cout << "<text ";
-	cout << "x = '" << left << "' ";
-	cout << "y = '" << baseline << "'>";
-	cout << text << "</text>";
+void svg_text(double left, double baseline, std::string text) {
+	std::cout << "<text ";
+	std::cout << "x = '" << left << "' ";
+	std::cout << "y = '" << baseline << "'>";
+	std::cout << text << "</text>";
 }
 
 void svg_rect(double x, double y, double width,
-	double height, string stroke, string fill) {
+	double height, std::string stroke, std::string fill) {
 
-	cout << "<rect ";
-	cout << "x = '" << x << "' ";
-	cout << "y = '" << y << "' ";
-	cout << "width = '" << width << "' ";
-	cout << "height = '" << height << "' ";
-	cout << "stroke = '" << stroke << "' ";
-	cout << "fill = '" << fill << "'";
-	cout << "/> ";
+	std::cout << "<rect ";
+	std::cout << "x = '" << x << "' ";
+	std::cout << "y = '" << y << "' ";
+	std::cout << "width = '" << width << "' ";
+	std::cout << "height = '" << height << "' ";
+	std::cout << "stroke = '" << stroke << "' ";
+	std::cout << "fill = '" << fill << "'";
+	std::cout << "/> ";
 }
 
 void svg_end() {
-	cout << "</svg>\n";
+	std::cout << "</svg>\n";
 }
 

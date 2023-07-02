@@ -3,45 +3,48 @@
 #include <vector>
 #include <cmath>
 #include <string>
+#include <sstream>
 #include "histogram.h"
 
-
-using namespace std;
 
 const size_t SCREEN_WIDTH = 40;
 const size_t MAX_ASTERISK = SCREEN_WIDTH - 5;
 
-vector<double> input_numbers(istream& in, size_t count) {
-	vector<double> result(count);
+std::vector<double> input_numbers(std::istream& in, size_t count) {
+	std::vector<double> result(count);
 	for (size_t i = 0; i < count; i++) {
 		in >> result[i];
 	}
 	return result;
 }
 
-Input read_input(istream& in, bool prompt) {
+Input read_input(std::istream& in, bool prompt) {
 	Input data;
 
-	if(prompt)
-		cerr << "Enter number count: ";
+	if (prompt)
+		std::cerr << "Enter number count: ";
 	size_t number_count;
 	in >> number_count;
 
 	if (prompt)
-		cerr << "Enter numbers: ";
-	data.numbers = input_numbers(in, number_count);
+		std::cerr << "Enter numbers: ";
+	std::vector<double> result(number_count);
+	for (size_t i = 0; i < number_count; i++) {
+		in >> result[i];
+	}
+	data.numbers = result;
 
 	if (prompt)
-		cerr << "Enter bin count:";
+		std::cerr << "Enter bin count:";
 	size_t bin_count;
-	cin >> data.bin_count;
+	in >> data.bin_count;
 
 	return data;
 }
 
-vector<size_t> make_histogram(Input input) {
+std::vector<size_t> make_histogram(Input input) {
 	double min, max;
-	vector<size_t> bins(input.bin_count);
+	std::vector<size_t> bins(input.bin_count);
 
 	find_minmax(input.numbers, min, max);
 
@@ -64,7 +67,7 @@ vector<size_t> make_histogram(Input input) {
 	return bins;
 }
 
-void show_histogram_svg(const vector<size_t>& bins) {
+void show_histogram_svg(const std::vector<size_t>& bins) {
 	const auto IMAGE_WIDTH = 400;
 	const auto IMAGE_HEIGHT = 300;
 	const auto TEXT_LEFT = 20;
@@ -85,7 +88,6 @@ void show_histogram_svg(const vector<size_t>& bins) {
 
 	svg_begin(IMAGE_WIDTH, IMAGE_HEIGHT);
 
-
 	double top = 0;
 	size_t number_of_stars;
 	for (size_t bin : bins) {
@@ -94,43 +96,52 @@ void show_histogram_svg(const vector<size_t>& bins) {
 			number_of_stars = (int)MAX_ASTERISK * (static_cast<double>(bin) / max_count);
 		}
 		const double bin_width = BLOCK_WIDTH * number_of_stars;
-		svg_text(TEXT_LEFT, top + TEXT_BASELINE, to_string(bin));
-		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "green", "#aaffaa");
+		svg_text(TEXT_LEFT, top + TEXT_BASELINE, std::to_string(bin));
+		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "red", "#aaffaa");
 		top += BIN_HEIGHT;
 	}
 	svg_end();
 }
 
+size_t write_data(void* items, size_t item_size, size_t item_count, void* ctx) {
+	size_t data_size = item_size * item_count;
+	const char* char_items = reinterpret_cast<const char*>(items);
+	std::stringstream* buffer = reinterpret_cast<std::stringstream*>(ctx);
+	buffer->write(char_items, data_size);
+	return data_size;
+}
+
+Input download(const std::string& address) {
+	std::stringstream buffer;
+
+	CURL* curl = curl_easy_init();
+	if (curl) {
+		CURLcode res;
+		curl_easy_setopt(curl, CURLOPT_URL, address.c_str());
+		/*отключение проаерки SSL-сертификата*/
+		/*https://m1try.github.io/txt_marks/marks.txt*/
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
+		res = curl_easy_perform(curl);
+		if (res != CURLE_OK) {
+			std::cout << curl_easy_strerror(res);
+			exit(1);
+		}
+		curl_easy_cleanup(curl);
+	}
+	return read_input(buffer, false);
+}
+
 
 int main(int argc, char* argv[]) {
+	Input input;
 	if (argc > 1) {
-
-		CURL* curl = curl_easy_init();
-		if (curl) {
-			CURLcode res;
-			curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
-
-			/*отключение проаерки SSL-сертификата (https://filesamples.com/samples/document/txt/sample3.txt)*/
-			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-			res = curl_easy_perform(curl);
-
-			if (res != CURLE_OK) {
-				cout << curl_easy_strerror(res);
-				exit(1);
-			}
-
-			cout << res;
-			curl_easy_cleanup(curl);
-		}
-
-		return 0;
-
+		input = download(argv[1]);
 	}
-	//curl_global_init(CURL_GLOBAL_ALL);
-
-	const auto input = read_input(cin, true);
-
+	else {
+		input = read_input(std::cin, true);
+	}
 	const auto bins = make_histogram(input);
-
 	show_histogram_svg(bins);
 }
