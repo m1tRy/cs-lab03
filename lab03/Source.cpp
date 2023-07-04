@@ -1,10 +1,12 @@
 #pragma warning(disable : 4996)
+#define INFO_BUFFER_SIZE 32767
 
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <string>
 #include <windows.h>
+#include <tchar.h>
 #include "histogram.h"
 
 
@@ -104,6 +106,11 @@ int main() {
 		DWORD build = platform;
 		printf("(build %u)\n", build);
 	}
+
+	TCHAR  infoBuf[INFO_BUFFER_SIZE];
+	DWORD  bufCharCount = INFO_BUFFER_SIZE;
+	GetComputerName(infoBuf, &bufCharCount);
+	_tprintf(TEXT("Computer name: %s"), infoBuf);
 
 
 	return 0;
