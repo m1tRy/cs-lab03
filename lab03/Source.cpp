@@ -1,3 +1,6 @@
+#pragma warning(disable : 4996)
+#define INFO_BUFFER_SIZE 32767
+
 #include <iostream>
 #include <curl/curl.h>
 #include <vector>
@@ -5,6 +8,10 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <windows.h>
+#include <tchar.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "histogram.h"
 
 
@@ -79,7 +86,46 @@ std::string make_nice_sign(double number) {
 	return string_num.erase(string_num.find(".") + 3);
 }
 
+
+std::string make_info_text() {
+
+	std::stringstream buffer;
+
+	buffer << "<tspan x = '20' dy = '1em'>";
+
+	DWORD  info = GetVersion();
+	DWORD mask_v = 0x0000ffff;
+	DWORD version = info & mask_v;
+
+	DWORD mask_M = 0x00ff;
+	DWORD version_major = version & mask_M;
+	DWORD version_minor = version >> 8;
+
+	buffer << "Windows v" << version_major << "." << version_minor;
+
+	DWORD platform = info >> 16;
+
+	if ((info & 0x80000000) == 0) {
+
+		DWORD build = platform;
+		buffer << " (build " << build << ")\n";
+	}
+
+	buffer << "</tspan><tspan x = '20' dy = '1em'>";
+
+	TCHAR  infoBuf[INFO_BUFFER_SIZE];
+	DWORD  bufCharCount = INFO_BUFFER_SIZE;
+	GetComputerName(infoBuf, &bufCharCount);
+	std::wstring test(&infoBuf[0]); //convert to wstring
+	std::string test2(test.begin(), test.end()); //and convert to string.
+
+	buffer << "Computer name: " << test2 << "</tspan>";
+
+	return buffer.str();
+}
+
 void show_histogram_svg(const std::vector<size_t>& bins, Input input) {
+
 	const auto IMAGE_WIDTH = 400;
 	const auto IMAGE_HEIGHT = 300;
 	const auto TEXT_LEFT = 20;
@@ -119,6 +165,7 @@ void show_histogram_svg(const std::vector<size_t>& bins, Input input) {
 			top += BIN_HEIGHT;
 		}
 	}
+	svg_text(TEXT_LEFT, IMAGE_HEIGHT - 50, make_info_text());
 	svg_end();
 }
 
