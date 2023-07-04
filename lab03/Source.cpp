@@ -19,8 +19,7 @@ std::vector<double> input_numbers(std::istream& in, size_t count) {
 	return result;
 }
 
-Input read_input(std::istream& in, bool prompt) {
-	Input data;
+Input read_input(std::istream& in, bool prompt, Input &data) {
 
 	if (prompt)
 		std::cerr << "Enter number count: ";
@@ -111,7 +110,7 @@ void show_histogram_svg(const std::vector<size_t>& bins, Input input) {
 		}
 		const double bin_width = BLOCK_WIDTH * number_of_stars;
 		svg_text(TEXT_LEFT + SHIFT_CAPT, top + TEXT_BASELINE, std::to_string(bins[i]));
-		svg_rect(TEXT_WIDTH + SHIFT_CAPT, top, bin_width, BIN_HEIGHT, "blue", "#aaffaa");
+		svg_rect(TEXT_WIDTH + SHIFT_CAPT, top, bin_width, BIN_HEIGHT, input.options[1], input.options[0]);
 		top += BIN_HEIGHT;
 
 		if (i < bins.size() - 1) {
@@ -131,7 +130,7 @@ size_t write_data(void* items, size_t item_size, size_t item_count, void* ctx) {
 	return data_size;
 }
 
-Input download(const std::string& address) {
+Input download(const std::string& address, Input &input) {
 	std::stringstream buffer;
 
 	CURL* curl = curl_easy_init();
@@ -150,17 +149,100 @@ Input download(const std::string& address) {
 		}
 		curl_easy_cleanup(curl);
 	}
-	return read_input(buffer, false);
+	return read_input(buffer, false, input);
 }
 
 
-int main(int argc, char* argv[]) {
-	Input input;
-		if (argc > 1) {
-		input = download(argv[1]);
+Input input_commands(int argc, char* argv[], Input &input) {
+
+	std::vector<std::string> erroes;
+	int const NUMBER_OF_ARG = 6;
+	int const NUMBER_OF_OPT = 3;
+	if (argc > NUMBER_OF_ARG) {
+		std::cerr << "Enter comand like: <progr.exe> --fill red --stroke green https://..." << std::endl;
+		std::cerr << "or" << std::endl;
+		std::cerr << "Enter comand like: <progr.exe> -f red -s green https://..." << std::endl;
+		exit(1);
+	}
+
+	std::vector<std::string> vector_argv;
+	for (size_t i = 1; i < argc; i++)
+	{
+		vector_argv.push_back(argv[i]);
+	}
+
+	for (size_t j = 0; j < NUMBER_OF_OPT - 1; j++) {
+		for (size_t i = 0; i < vector_argv.size(); i++) {
+
+			std::string arg = vector_argv[i];
+			if (arg == "--fill" || arg == "-f") {
+				if (i != vector_argv.size() - 1 && vector_argv[i + 1][0] != '-') {
+					auto iter = vector_argv.cbegin();
+					input.options[0] = vector_argv[i + 1];
+					vector_argv.erase(iter + i);
+					iter = vector_argv.cbegin();
+					vector_argv.erase(iter + i);
+					break;
+				}
+				else {
+					erroes.push_back("Enter comand like: --fill red or -f red");
+					auto iter = vector_argv.cbegin();
+					vector_argv.erase(iter + i);
+				}
+			}
+			if (arg == "--stroke" || arg == "-s") {
+				if (i != vector_argv.size() - 1 && vector_argv[i + 1][0] != '-') {
+					auto iter = vector_argv.cbegin();
+					input.options[1] = vector_argv[i + 1];
+					vector_argv.erase(iter + i);
+					iter = vector_argv.cbegin();
+					vector_argv.erase(iter + i);
+					break;
+
+				}
+				else {
+					erroes.push_back("Enter comand like: --stroke red or -s red");
+					auto iter = vector_argv.cbegin();
+					vector_argv.erase(iter + i);
+				}
+			}
+		}
+
+	}
+
+	if (vector_argv.size() > 1) {
+		std::cerr << "Enter comand like: <progr.exe> --fill red --stroke green https://..." << std::endl;
+		std::cerr << "or" << std::endl;
+		std::cerr << "Enter comand like: <progr.exe> -f red -s green https://..." << std::endl;
+		exit(1);
+	}
+
+
+	if (erroes.size() != 0) {
+		std::cerr << "error:" << std::endl;
+		for (size_t i = 0; i < erroes.size(); i++)
+		{
+			std::cerr << erroes[i] << std::endl;
+		}
+		exit(1);
+	}
+
+	std::string path;
+	if (vector_argv.size() == 1) {
+		return download(vector_argv[0], input);
 	}
 	else {
-		input = read_input(std::cin, true);
+		return read_input(std::cin, true, input);
+	}
+}
+
+int main(int argc, char* argv[]) {
+	Input input;
+	if (argc > 1) {
+		input = input_commands(argc, argv, input);
+	}
+	else {
+		input = read_input(std::cin, true, input);
 	}
 
 	const auto bins = make_histogram(input);

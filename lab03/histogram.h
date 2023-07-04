@@ -7,6 +7,7 @@
 struct Input {
 	std::vector<double> numbers;
 	std::vector<double> column_signature;
+	std::vector<std::string> options = { "green", "green" };
 	size_t bin_count;
 
 };
