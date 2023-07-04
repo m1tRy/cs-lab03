@@ -88,8 +88,12 @@ void show_histogram_svg(const vector<size_t>& bins) {
 int main() {
 
 	DWORD  info = GetVersion();
-	printf("%u\n", info); //десятичная сис
-	printf("%x\n", info); //шестнацатиричная сис
+	DWORD mask_v = 0x0000ffff;
+	DWORD version = info & mask_v;
+	printf("%u\n", version); 
+
+	DWORD platform = info >> 16;
+	printf("%u\n", platform); 
 
 	return 0;
 	size_t number_count;
