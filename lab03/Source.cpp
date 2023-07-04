@@ -1,7 +1,10 @@
+#pragma warning(disable : 4996)
+
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <string>
+#include <windows.h>
 #include "histogram.h"
 
 
@@ -83,6 +86,12 @@ void show_histogram_svg(const vector<size_t>& bins) {
 
 
 int main() {
+
+	DWORD  info = GetVersion();
+	printf("%u\n", info); //десятичная сис
+	printf("%x\n", info); //шестнацатиричная сис
+
+	return 0;
 	size_t number_count;
 	std::cerr << "Enter number count:";
 	std::cin >> number_count;
