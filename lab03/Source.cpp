@@ -90,10 +90,21 @@ int main() {
 	DWORD  info = GetVersion();
 	DWORD mask_v = 0x0000ffff;
 	DWORD version = info & mask_v;
-	printf("%u\n", version); 
 
-	DWORD platform = info >> 16;
-	printf("%u\n", platform); 
+	DWORD mask_M = 0x00ff;
+	DWORD version_major = version & mask_M;
+	DWORD version_minor = version >> 8;
+
+	printf("Windows v%u.%u ", version_major, version_minor);
+
+	DWORD platform = info >> 16; 
+
+	if ((info & 0x80000000) == 0) {
+
+		DWORD build = platform;
+		printf("(build %u)\n", build);
+	}
+
 
 	return 0;
 	size_t number_count;
