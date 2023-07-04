@@ -7,6 +7,9 @@
 #include <string>
 #include <windows.h>
 #include <tchar.h>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
 #include "histogram.h"
 
 
@@ -49,6 +52,42 @@ vector<size_t> make_histogram(const vector<double>& numbers, size_t bin_count) {
 	return bins;
 }
 
+string make_info_text() {
+	stringstream buffer;
+
+	buffer << "<tspan x = '20' dy = '1em'>";
+
+	DWORD  info = GetVersion();
+	DWORD mask_v = 0x0000ffff;
+	DWORD version = info & mask_v;
+
+	DWORD mask_M = 0x00ff;
+	DWORD version_major = version & mask_M;
+	DWORD version_minor = version >> 8;
+
+	buffer << "Windows v" << version_major << "." << version_minor;
+
+	DWORD platform = info >> 16;
+
+	if ((info & 0x80000000) == 0) {
+
+		DWORD build = platform;
+		buffer << " (build " << build << ")\n";
+	}
+
+	buffer << "</tspan><tspan x = '20' dy = '1em'>";
+
+	TCHAR  infoBuf[INFO_BUFFER_SIZE];
+	DWORD  bufCharCount = INFO_BUFFER_SIZE;
+	GetComputerName(infoBuf, &bufCharCount);
+	wstring test(&infoBuf[0]); //convert to wstring
+	string test2(test.begin(), test.end()); //and convert to string.
+
+	buffer << "Computer name: " << test2 << "</tspan>";
+
+	return buffer.str();
+}
+
 void show_histogram_svg(const vector<size_t>& bins) {
 	const auto IMAGE_WIDTH = 400;
 	const auto IMAGE_HEIGHT = 300;
@@ -83,37 +122,12 @@ void show_histogram_svg(const vector<size_t>& bins) {
 		svg_rect(TEXT_WIDTH, top, bin_width, BIN_HEIGHT, "blue", "#aaffaa");
 		top += BIN_HEIGHT;
 	}
+	svg_text(TEXT_LEFT, IMAGE_HEIGHT - 50, make_info_text());
 	svg_end();
 }
 
 
 int main() {
-
-	DWORD  info = GetVersion();
-	DWORD mask_v = 0x0000ffff;
-	DWORD version = info & mask_v;
-
-	DWORD mask_M = 0x00ff;
-	DWORD version_major = version & mask_M;
-	DWORD version_minor = version >> 8;
-
-	printf("Windows v%u.%u ", version_major, version_minor);
-
-	DWORD platform = info >> 16; 
-
-	if ((info & 0x80000000) == 0) {
-
-		DWORD build = platform;
-		printf("(build %u)\n", build);
-	}
-
-	TCHAR  infoBuf[INFO_BUFFER_SIZE];
-	DWORD  bufCharCount = INFO_BUFFER_SIZE;
-	GetComputerName(infoBuf, &bufCharCount);
-	_tprintf(TEXT("Computer name: %s"), infoBuf);
-
-
-	return 0;
 	size_t number_count;
 	std::cerr << "Enter number count:";
 	std::cin >> number_count;
